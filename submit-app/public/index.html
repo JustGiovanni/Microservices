@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit a Question</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Submit a New Question</h1>
+
+        <!-- Success/Error Message Box -->
+        <div id="message-box" class="message" style="display: none;"></div>
+
+        <form id="submit-form">
+            <!-- Question Input -->
+            <label for="question">Question:</label>
+            <textarea id="question" required></textarea>
+
+            <!-- Answer Options -->
+            <label>Options:</label>
+            <div class="options">
+                <input type="radio" name="correct-option" value="1" required>
+                <input type="text" id="option1" placeholder="Option 1 (Correct Answer)" required>
+
+                <input type="radio" name="correct-option" value="2">
+                <input type="text" id="option2" placeholder="Option 2" required>
+
+                <input type="radio" name="correct-option" value="3">
+                <input type="text" id="option3" placeholder="Option 3" required>
+
+                <input type="radio" name="correct-option" value="4">
+                <input type="text" id="option4" placeholder="Option 4" required>
+            </div>
+
+            <!-- Category Selection -->
+            <label for="category">Select Category:</label>
+            <select id="category">
+                <option value="">Loading categories...</option>
+            </select>
+
+            <!-- New Category Input -->
+            <label for="new-category">Or Add a New Category:</label>
+            <input type="text" id="new-category" placeholder="New category (optional)">
+
+            <!-- Submit Button -->
+            <button type="submit">Submit Question</button>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

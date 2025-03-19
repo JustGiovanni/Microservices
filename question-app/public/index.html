@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Quiz Application</h1>
+
+        <!-- Category Selection -->
+        <label for="category-select">Select a Category:</label>
+        <select id="category-select"></select>
+
+        <!-- Get Question Button -->
+        <button id="get-question">Get Random Question</button>
+
+        <!-- Question Display -->
+        <div id="question-container" style="display: none;">
+            <h2 id="question-text"></h2>
+            <div id="answers" class="answer-buttons"></div>
+
+            <!-- Buttons for answer submission and next question -->
+            <button id="submit-answer">Submit Answer</button>
+            <button id="next-question" style="display: none;">Next Question</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

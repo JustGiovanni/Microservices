@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:latest
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword  # Set the same password used in db.js
+      MYSQL_DATABASE: quizdb
+      MYSQL_USER: quizuser
+      MYSQL_PASSWORD: quizpassword
+    ports:
+      - "3306:3306"
+    networks:
+      - quiz-network
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  question_service:
+    build: ./question-app
+    container_name: question_service
+    restart: always
+    depends_on:
+      - mysql-db
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: quizdb
+    ports:
+      - "5000:5000"
+    networks:
+      - quiz-network
+
+  submit_service:
+    build: ./submit-app
+    container_name: submit_service
+    restart: always
+    depends_on:
+      - mysql-db
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: quizdb
+    ports:
+      - "5001:5001"
+    networks:
+      - quiz-network
+
+networks:
+  quiz-network:
+
+volumes:
+  mysql_data:
