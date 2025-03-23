@@ -6,7 +6,7 @@ services:
     container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword  # Set the same password used in db.js
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: quizdb
       MYSQL_USER: quizuser
       MYSQL_PASSWORD: quizpassword
@@ -17,19 +17,13 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
 
-  question_service:
-    build: ./question-app
-    container_name: question_service
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
     restart: always
-    depends_on:
-      - mysql-db
-    environment:
-      DB_HOST: mysql-db
-      DB_USER: root
-      DB_PASSWORD: rootpassword
-      DB_NAME: quizdb
     ports:
-      - "5000:5000"
+      - "5672:5672"
+      - "15672:15672"  # RabbitMQ Management Console
     networks:
       - quiz-network
 
@@ -39,18 +33,41 @@ services:
     restart: always
     depends_on:
       - mysql-db
+      - rabbitmq
     environment:
       DB_HOST: mysql-db
       DB_USER: root
       DB_PASSWORD: rootpassword
       DB_NAME: quizdb
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
     ports:
       - "5001:5001"
+    volumes:
+      - ./submit-app/cache:/app/cache # <-- Correct volume mapping
+    networks:
+      - quiz-network
+
+  question_service:
+    build: ./question-app
+    container_name: question_service
+    restart: always
+    depends_on:
+      - mysql-db
+      - rabbitmq
+    environment:
+      DB_HOST: mysql-db
+      DB_USER: root
+      DB_PASSWORD: rootpassword
+      DB_NAME: quizdb
+      RABBITMQ_URL: "amqp://rabbitmq:5672"
+    ports:
+      - "5000:5000"
     networks:
       - quiz-network
 
 networks:
   quiz-network:
+    driver: bridge
 
 volumes:
   mysql_data:

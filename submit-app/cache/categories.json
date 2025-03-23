@@ -1,0 +1,30 @@
+[
+  {
+    "id": 5,
+    "name": "Age"
+  },
+  {
+    "id": 4,
+    "name": "AnimalScience"
+  },
+  {
+    "id": 2,
+    "name": "History"
+  },
+  {
+    "id": 7,
+    "name": "Life"
+  },
+  {
+    "id": 6,
+    "name": "Maths"
+  },
+  {
+    "id": 1,
+    "name": "Science"
+  },
+  {
+    "id": 3,
+    "name": "Sports"
+  }
+]
