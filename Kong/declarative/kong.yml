@@ -1,0 +1,25 @@
+_format_version: "2.1"  # Specifies the version of the configuration format.
+
+services:
+  # Service for handling questions
+  - name: question-service
+    url: http://question_service:5000  # URL to reach the question service.
+    routes:
+      - name: question-route  # Define the route name.
+        paths:
+          - /questions  # The path for the route.
+        strip_path: true  # Remove the matched path from the request before forwarding.
+        plugins:
+          - name: rate-limiting  # Enable rate-limiting plugin.
+            config:
+              minute: 5  # Limit to 5 requests per minute.
+              policy: local  # Local rate-limiting policy.
+
+  # Service for handling question submissions
+  - name: submit-service
+    url: http://submit_service:5001  # URL to reach the submit service.
+    routes:
+      - name: submit-route  # Define the route name.
+        paths:
+          - /submit  # The path for submitting questions.
+        strip_path: true  # Remove the matched path from the request before forwarding.

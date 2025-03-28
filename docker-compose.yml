@@ -1,73 +1,82 @@
+# Version of Docker Compose we're using
 version: '3.8'
 
+# Define the services (containers) that will run
 services:
+  
+  # MySQL service - This is our database container
   mysql-db:
-    image: mysql:latest
-    container_name: mysql-db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: quizdb
-      MYSQL_USER: quizuser
-      MYSQL_PASSWORD: quizpassword
+    image: mysql:latest # We're using the latest version of the MySQL Docker image
+    container_name: mysql-db # Name of the container
+    restart: always # Restart the container if it fails
+    environment: # Environment variables to set up MySQL
+      MYSQL_ROOT_PASSWORD: rootpassword # Set the root password for MySQL
+      MYSQL_DATABASE: quizdb # The database we want to create when the container starts
+      MYSQL_USER: quizuser # User for accessing the database
+      MYSQL_PASSWORD: quizpassword # Password for the quiz user
     ports:
-      - "3306:3306"
+      - "3306:3306" # Mapping port 3306 on the host to the container's port 3306
     networks:
-      - quiz-network
+      - quiz-network # Connect this container to the quiz-network
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql # Persistent storage for MySQL data (it'll survive container restarts)
 
+  # RabbitMQ service - For message queuing between microservices
   rabbitmq:
-    image: rabbitmq:management
-    container_name: rabbitmq
-    restart: always
+    image: rabbitmq:management # Using the RabbitMQ image with the management plugin
+    container_name: rabbitmq # Name of the container
+    restart: always # Restart if it fails
     ports:
-      - "5672:5672"
-      - "15672:15672"  # RabbitMQ Management Console
+      - "5672:5672" # Port for the RabbitMQ broker
+      - "15672:15672" # Management console for RabbitMQ (so we can monitor queues)
     networks:
-      - quiz-network
+      - quiz-network # Connect this container to the same network
 
+  # Submit service - Handles question submissions
   submit_service:
-    build: ./submit-app
-    container_name: submit_service
-    restart: always
-    depends_on:
+    build: ./submit-app # Build the submit service from the ./submit-app directory (Dockerfile there)
+    container_name: submit_service # Name of the container
+    restart: always # Restart if it fails
+    depends_on: # This ensures submit_service waits for MySQL and RabbitMQ to be ready first
       - mysql-db
       - rabbitmq
-    environment:
-      DB_HOST: mysql-db
-      DB_USER: root
-      DB_PASSWORD: rootpassword
-      DB_NAME: quizdb
-      RABBITMQ_URL: "amqp://rabbitmq:5672"
+    environment: # Environment variables specific to the submit service
+      DB_HOST: mysql-db # Point to the MySQL container (this will be the service name in Docker Compose)
+      DB_USER: root # MySQL root user
+      DB_PASSWORD: rootpassword # Root password
+      DB_NAME: quizdb # The database we want to connect to
+      RABBITMQ_URL: "amqp://rabbitmq:5672" # RabbitMQ URL for submitting messages
     ports:
-      - "5001:5001"
+      - "5001:5001" # Expose port 5001 on the host to access the submit service
     volumes:
-      - ./submit-app/cache:/app/cache # <-- Correct volume mapping
+      - ./submit-app/cache:/app/cache # Mount the cache folder in submit-app to the container (persistent storage)
     networks:
-      - quiz-network
+      - quiz-network # Connect to the same quiz network as MySQL and RabbitMQ
 
+  # Question service - Handles fetching of questions
   question_service:
-    build: ./question-app
-    container_name: question_service
-    restart: always
-    depends_on:
+    build: ./question-app # Build the question service from the ./question-app directory (Dockerfile there)
+    container_name: question_service # Name of the container
+    restart: always # Restart if it fails
+    depends_on: # This ensures question_service waits for MySQL and RabbitMQ to be ready first
       - mysql-db
       - rabbitmq
-    environment:
-      DB_HOST: mysql-db
-      DB_USER: root
-      DB_PASSWORD: rootpassword
-      DB_NAME: quizdb
-      RABBITMQ_URL: "amqp://rabbitmq:5672"
+    environment: # Environment variables specific to the question service
+      DB_HOST: mysql-db # Point to the MySQL container
+      DB_USER: root # MySQL root user
+      DB_PASSWORD: rootpassword # Root password
+      DB_NAME: quizdb # The database we want to connect to
+      RABBITMQ_URL: "amqp://rabbitmq:5672" # RabbitMQ URL for fetching messages
     ports:
-      - "5000:5000"
+      - "5000:5000" # Expose port 5000 on the host to access the question service
     networks:
-      - quiz-network
+      - quiz-network # Connect to the same quiz network as MySQL and RabbitMQ
 
+# Define the Docker network we'll use for all these services
 networks:
   quiz-network:
-    driver: bridge
+    driver: bridge # We use a bridge network driver to connect all the containers together
 
+# Define persistent storage volumes
 volumes:
-  mysql_data:
+  mysql_data: # This volume is used to store the MySQL database data so it persists even after the container stops

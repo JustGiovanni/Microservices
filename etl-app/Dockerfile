@@ -1,20 +1,20 @@
-# Use a specific version of Node.js as a base image
-FROM node:14
+# Use Node.js base image
+FROM node:18
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json first to take advantage of Docker cache
+# Copy package.json and package-lock.json
 COPY package*.json ./
 
-# Install the dependencies inside the container
+# Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy application source code
 COPY . .
 
-# Expose the port the app will listen on . edit according to app
-EXPOSE 5002  
+# Expose the port
+EXPOSE 5002
 
-# Command to start the application
+# Start the service
 CMD ["npm", "start"]
